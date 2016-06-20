@@ -1,0 +1,88 @@
+---
+title: "Param Singh - Project 1"
+author: "Param Singh"
+date: "June 19, 2016"
+output: html_document
+---
+
+<br><br>
+This recommender system uses the values from the lecture-provided dataset that have been mean-centered normalized. It will attempt to recommend movies, based on similarity of reviews of other movies.<br>
+
+```{r}
+# Create normalized data frame using provided mean-centered values
+itemdf <- data.frame()
+matt <- c(.75,NA,-1.25,NA,-1.25,1.75)
+mauricio <- c(.5,NA,-.5,-.5,.5,NA)
+param <- c(.5,.5,-2.5,NA,NA,1.5)
+shipra <- c(NA,NA,0,1,NA,-1)
+itemdf <- data.frame(matt,mauricio,param,shipra)
+obsnames <- c("CaptainAmerica","Deadpool","Frozen","JungleBook","PitchPerfect2","StarWarsForce")
+rownames(itemdf) <- obsnames
+
+itemdf
+```
+
+
+
+```{r}
+
+itemvector <- function(df){
+  sum(df^2, na.rm=TRUE)^.5
+}
+
+# Calculate the length of each item vector
+itemweight <- apply(itemdf, 1, itemvector)
+
+# Apply Item-Item similarity
+itemitemcf <- data.frame()
+itemitemcf[1,1] <- 1
+itemitemcf[2,1] <- (sum(itemdf["Deadpool",]*itemdf["CaptainAmerica",], na.rm=TRUE))/(itemweight['CaptainAmerica'] * itemweight['Deadpool'])
+itemitemcf[3,1] <- (sum(itemdf["Frozen",]*itemdf["CaptainAmerica",], na.rm=TRUE))/(itemweight['CaptainAmerica'] * itemweight['Frozen'])
+itemitemcf[4,1] <- (sum(itemdf["JungleBook",]*itemdf["CaptainAmerica",], na.rm=TRUE))/(itemweight['CaptainAmerica'] * itemweight['JungleBook'])
+itemitemcf[5,1] <- (sum(itemdf["PitchPerfect2",]*itemdf["CaptainAmerica",], na.rm=TRUE))/(itemweight['CaptainAmerica'] * itemweight['PitchPerfect2'])
+itemitemcf[6,1] <- (sum(itemdf["StarWarsForce",]*itemdf["CaptainAmerica",], na.rm=TRUE))/(itemweight['CaptainAmerica'] * itemweight['StarWarsForce'])
+
+itemitemcf[1,2] <- (sum(itemdf["Deadpool",]*itemdf["CaptainAmerica",], na.rm=TRUE))/(itemweight['CaptainAmerica'] * itemweight['Deadpool'])
+itemitemcf[2,2] <- 1
+itemitemcf[3,2] <- (sum(itemdf["Frozen",]*itemdf["Deadpool",], na.rm=TRUE))/(itemweight['Deadpool'] * itemweight['Frozen'])
+itemitemcf[4,2] <- (sum(itemdf["JungleBook",]*itemdf["Deadpool",], na.rm=TRUE))/(itemweight['Deadpool'] * itemweight['JungleBook'])
+itemitemcf[5,2] <- (sum(itemdf["PitchPerfect2",]*itemdf["Deadpool",], na.rm=TRUE))/(itemweight['Deadpool'] * itemweight['PitchPerfect2'])
+itemitemcf[6,2] <- (sum(itemdf["StarWarsForce",]*itemdf["Deadpool",], na.rm=TRUE))/(itemweight['Deadpool'] * itemweight['StarWarsForce'])
+
+itemitemcf[1,3] <- (sum(itemdf["Frozen",]*itemdf["CaptainAmerica",], na.rm=TRUE))/(itemweight['CaptainAmerica'] * itemweight['Frozen'])
+itemitemcf[2,3] <- (sum(itemdf["Frozen",]*itemdf["Deadpool",], na.rm=TRUE))/(itemweight['Deadpool'] * itemweight['Frozen'])
+itemitemcf[3,3] <- 1
+itemitemcf[4,3] <- (sum(itemdf["JungleBook",]*itemdf["Frozen",], na.rm=TRUE))/(itemweight['Frozen'] * itemweight['JungleBook'])
+itemitemcf[5,3] <- (sum(itemdf["PitchPerfect2",]*itemdf["Frozen",], na.rm=TRUE))/(itemweight['Frozen'] * itemweight['PitchPerfect2'])
+itemitemcf[6,3] <- (sum(itemdf["StarWarsForce",]*itemdf["Frozen",], na.rm=TRUE))/(itemweight['Frozen'] * itemweight['StarWarsForce'])
+
+itemitemcf[1,4] <- (sum(itemdf["JungleBook",]*itemdf["CaptainAmerica",], na.rm=TRUE))/(itemweight['CaptainAmerica'] * itemweight['JungleBook'])
+itemitemcf[2,4] <- (sum(itemdf["JungleBook",]*itemdf["Deadpool",], na.rm=TRUE))/(itemweight['Deadpool'] * itemweight['JungleBook'])
+itemitemcf[3,4] <- (sum(itemdf["JungleBook",]*itemdf["Frozen",], na.rm=TRUE))/(itemweight['Frozen'] * itemweight['JungleBook'])
+itemitemcf[4,4] <- 1
+itemitemcf[5,4] <- (sum(itemdf["PitchPerfect2",]*itemdf["JungleBook",], na.rm=TRUE))/(itemweight['JungleBook'] * itemweight['PitchPerfect2'])
+itemitemcf[6,4] <- (sum(itemdf["StarWarsForce",]*itemdf["JungleBook",], na.rm=TRUE))/(itemweight['Frozen'] * itemweight['JungleBook'])
+
+itemitemcf[1,5] <- (sum(itemdf["PitchPerfect2",]*itemdf["CaptainAmerica",], na.rm=TRUE))/(itemweight['CaptainAmerica'] * itemweight['PitchPerfect2'])
+itemitemcf[2,5] <- (sum(itemdf["PitchPerfect2",]*itemdf["Deadpool",], na.rm=TRUE))/(itemweight['Deadpool'] * itemweight['PitchPerfect2'])
+itemitemcf[3,5] <- (sum(itemdf["PitchPerfect2",]*itemdf["Frozen",], na.rm=TRUE))/(itemweight['Frozen'] * itemweight['PitchPerfect2'])
+itemitemcf[4,5] <- (sum(itemdf["PitchPerfect2",]*itemdf["JungleBook",], na.rm=TRUE))/(itemweight['JungleBook'] * itemweight['PitchPerfect2'])
+itemitemcf[5,5] <- 1
+itemitemcf[6,5] <- (sum(itemdf["StarWarsForce",]*itemdf["PitchPerfect2",], na.rm=TRUE))/(itemweight['StarWarsForce'] * itemweight['PitchPerfect2'])
+
+itemitemcf[1,6] <- (sum(itemdf["StarWarsForce",]*itemdf["CaptainAmerica",], na.rm=TRUE))/(itemweight['CaptainAmerica'] * itemweight['StarWarsForce'])
+itemitemcf[2,6] <- (sum(itemdf["StarWarsForce",]*itemdf["Deadpool",], na.rm=TRUE))/(itemweight['Deadpool'] * itemweight['StarWarsForce'])
+itemitemcf[3,6] <- (sum(itemdf["StarWarsForce",]*itemdf["Frozen",], na.rm=TRUE))/(itemweight['Frozen'] * itemweight['StarWarsForce'])
+itemitemcf[4,6] <- (sum(itemdf["StarWarsForce",]*itemdf["JungleBook",], na.rm=TRUE))/(itemweight['JungleBook'] * itemweight['StarWarsForce'])
+itemitemcf[5,6] <- (sum(itemdf["StarWarsForce",]*itemdf["PitchPerfect2",], na.rm=TRUE))/(itemweight['StarWarsForce'] * itemweight['PitchPerfect2'])
+itemitemcf[6,6] <- 1
+
+rownames(itemitemcf) <- obsnames
+colnames(itemitemcf) <- obsnames
+
+# This data frame indicates similarity of items with other items, in this case movies - as rated by the user group
+itemitemcf
+
+heatmap(data.matrix(itemitemcf))
+```
+
